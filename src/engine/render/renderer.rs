@@ -1,6 +1,7 @@
 use std::ffi::CString;
 use gl::types::GLsizeiptr;
 use gl::types::GLsizei;
+use crate::math::transform::Transform;
 use super::shader::Program;
 
 
@@ -83,9 +84,11 @@ impl Renderer{
             vertex_count,
             transform_location
         })
-
-
-            
+        
+    }
+    
+    pub(crate) fn render(&mut self, transfrom: &Transform){
+        
     }
 }
 
