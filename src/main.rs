@@ -30,8 +30,7 @@ fn main() {
         .unwrap();
 
     let mut event_pump = context.event_pump().unwrap();
-    let _gl_context = window.gl_create_context().unwrap();
-    gl::load_with(|s| video_ctx.gl_get_proc_address(s) as *const _);
+    
     
     unsafe {
         gl::Enable(gl::BLEND);

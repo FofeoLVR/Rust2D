@@ -37,8 +37,7 @@ impl Renderer{
             if transform_location == -1 {
                 return Err("Uniform uTransform introuvable".to_string());
             }
-
-            gl::UseProgram(program.id());
+            
             gl::GenVertexArrays(1, &mut vao);
             gl::BindVertexArray(vao);
             gl::GenBuffers(1, &mut vbo);
