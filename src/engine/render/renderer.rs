@@ -7,11 +7,11 @@ use super::shader::Program;
 
 const VERTEX_SIZE: usize = 7;
 pub struct Renderer {
-    pub program: Program,
-    pub vao: u32,
-    pub vbo: u32,
-    pub vertex_count: GLsizei,
-    pub transform_location: i32,
+    program: Program,
+    vao: u32,
+    vbo: u32,
+    vertex_count: GLsizei,
+    transform_location: i32,
 }
 
 impl Drop for Renderer{
@@ -86,9 +86,17 @@ impl Renderer{
         })
         
     }
-    
-    pub(crate) fn render(&mut self, transfrom: &Transform){
-        
+
+    pub(crate) fn render(&mut self, transform: &mut Transform){
+        unsafe{
+            gl::ClearColor(0.0, 0.05, 0.08, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+            gl::UseProgram(self.program.id());
+            gl::BindVertexArray(self.vao);
+            let matrix = transform.get_matrix();
+            gl::UniformMatrix3fv(self.transform_location, 1, gl::TRUE, matrix.data.as_ptr());
+            gl::DrawArrays(gl::TRIANGLES, 0, self.vertex_count);
+        }
     }
 }
 
