@@ -1,0 +1,104 @@
+use std::ffi::{CString, NulError};
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::Sdl;
+use sdl2::video::GLProfile;
+
+
+
+
+fn main() {
+    let  context:Sdl = sdl2::init().unwrap();
+
+    let video_ctx = context.video().unwrap();
+
+    let gl_attr = video_ctx.gl_attr();
+
+    gl_attr.set_context_profile(GLProfile::Core);
+    gl_attr.set_context_version(3, 3);
+
+    let window = video_ctx
+        .window("Rust2D Engine", 1280, 720)
+        .opengl()
+        .build()
+        .unwrap();
+    let mut event_pump = context.event_pump().unwrap();
+    let gl_context = window.gl_create_context().unwrap();
+    gl::load_with(|s| video_ctx.gl_get_proc_address(s) as *const _);
+
+    let vert_shader = get_shader("src/render/shaders/basic.vert");
+    match vert_shader{
+        Ok(vert_shader) => {
+            let shader_id = compile_shader(&vert_shader, gl::VERTEX_SHADER);
+        }
+        Result::Err(err) => {
+            println!("{}", err);
+        }
+    }
+    'running: loop{
+
+
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit { .. } => {
+                    println!("Quit");
+                    break 'running;
+                    },
+                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    println!("Escape");
+                    break 'running;
+                }
+                _ => {}
+            }
+        }
+
+        update_opengl_window(&window);
+
+
+    }
+}
+
+fn update_opengl_window(window: &sdl2::video::Window) {
+    unsafe {
+        gl::ClearColor(1.0, 0.05, 0.08, 1.0);
+        gl::Clear(gl::COLOR_BUFFER_BIT);
+
+    }
+    window.gl_swap_window();
+}
+
+fn get_shader(path:&str) -> Result<String, std::io::Error> {
+    let shader = std::fs::read_to_string(path);
+    shader
+}
+
+fn compile_shader(source: &str, shader_type: u32) -> u32 {
+    let c_source = CString::new(source)
+        .expect("Impossible de convertir le shader en CString");
+
+    let shader = unsafe {
+        let shader = gl::CreateShader(shader_type);
+
+        let source_ptr = c_source.as_ptr();
+
+        gl::ShaderSource(shader, 1, &source_ptr, std::ptr::null());
+
+        gl::CompileShader(shader);
+
+        let mut success = gl::FALSE as gl::types::GLint;
+
+        gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
+
+        if success == gl::FALSE as gl::types::GLint {
+            println!("Échec de compilation du shader !");
+        } else {
+            println!("Shader compilé avec succès !");
+        }
+        shader
+
+    };
+
+
+
+    shader
+}
